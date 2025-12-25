@@ -61,16 +61,16 @@ Normals use Marsaglia Polar (scalar + AVX2 vectorized rejection).
 Optional UA_STREAM_STORES=1 enables non-temporal writes when buffers are aligned.
 
 📊 Version History / Comparison
-Feature / Metric	v1.5 (Stable)	v1.6 (Experimental)	v1.7 (Current)
-SIMD Support	SSE2, AVX2, AVX-512, NEON	SSE2, AVX2, AVX-512, NEON	Scalar, AVX2, AVX-512F (runtime dispatch)
-Algorithms	Xoroshiro128++, WyRand	+ Philox4x32-10	xoshiro256**, normals (Polar)
-GPU Support	OpenCL (optional)	OpenCL (partial)	Dropped (CPU SIMD focus, revisit later)
-Multi-thread Scaling	Limited	Introduced affinity scaling	Out-of-scope (batch SIMD focus)
-Batch Throughput	Excellent	Excellent to Exceptional	4× lanes (AVX2), 8× lanes (AVX-512F)
-Single Number Gen.	Competitive, std::mt19937 sometimes	Same	Fast scalar baseline + SIMD batch paths
-API Style	C API (handles)	Hybrid experimental modular API	Modern C++ façade (ua::Rng)
-Portability	Mature, well-tested	Incomplete OS/arch support	Unified, per-OS builds w/ runtime dispatch
-Recommended For	Production workloads	R&D, perf testing	Production workloads needing portability + perf
+Feature / Metric			v1.5 (Stable)					v1.6 (Experimental)					v1.7 (Current)
+SIMD Support				SSE2, AVX2, AVX-512, NEON			SSE2, AVX2, AVX-512, NEON				Scalar, AVX2, AVX-512F (runtime dispatch)
+Algorithms				Xoroshiro128++, WyRand				+ Philox4x32-10	xoshiro256**, normals (Polar)
+GPU Support				OpenCL (optional)				OpenCL (partial)					Dropped (CPU SIMD focus, revisit later)
+Multi-thread Scaling			Limited	Introduced affinity scaling		Out-of-scope (batch SIMD focus)
+Batch Throughput			Excellent					Excellent to Exceptional				4× lanes (AVX2), 8× lanes (AVX-512F)
+Single Number Gen.			Competitive, std::mt19937 sometimes	Same	Fast scalar baseline + SIMD batch paths
+API Style				C API (handles)	Hybrid experimental modular API	Modern C++ façade (ua::Rng)
+Portability				Mature, well-tested				Incomplete OS/arch support				Unified, per-OS builds w/ runtime dispatch
+Recommended For	Production workloads	R&D, perf testing				Production workloads needing portability + perf
 
 For full historical details see CHANGELOG.md
 .

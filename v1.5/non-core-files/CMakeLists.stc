@@ -1,0 +1,151 @@
+cmake_minimum_required(VERSION 3.14)
+project(universal_rng LANGUAGES CXX)
+
+include(CheckCXXCompilerFlag)
+include(CheckCXXSourceCompiles)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Base source files
+set(SRC_FILES
+    src/universal_rng.cpp
+    src/universal_rng_api.cpp
+    src/universal_rng_bitwidth.cpp
+    src/universal_rng_scalar.cpp
+    src/runtime_detect.cpp
+    src/cpu_detect.cpp
+)
+
+# SIMD detection and compilation setup
+set(SIMD_SOURCES)
+set(SIMD_COMPILE_DEFINITIONS)
+
+# Enhanced MSVC vs GCC/Clang detection
+if(MSVC)
+    message(STATUS "Detected MSVC compiler ${CMAKE_CXX_COMPILER_VERSION}")
+    
+    # SSE2 is always available on x64 with MSVC
+    message(STATUS "SSE2: Enabled (default on x64)")
+    list(APPEND SIMD_SOURCES src/simd_sse2.cpp)
+    list(APPEND SIMD_COMPILE_DEFINITIONS USE_SSE2)
+    
+    # Test AVX2 with MSVC
+    set(CMAKE_REQUIRED_FLAGS "/arch:AVX2")
+    check_cxx_source_compiles("
+        #include <immintrin.h>
+        int main() { 
+            __m256i a = _mm256_setzero_si256();
+            __m256i b = _mm256_add_epi64(a, a);
+            return _mm256_extract_epi64(b, 0);
+        }" HAS_AVX2)
+    unset(CMAKE_REQUIRED_FLAGS)
+    
+    if (HAS_AVX2)
+        message(STATUS "AVX2 support detected. Enabling AVX2 build.")
+        list(APPEND SIMD_SOURCES src/simd_avx2.cpp)
+        list(APPEND SIMD_COMPILE_DEFINITIONS USE_AVX2)
+        set_source_files_properties(src/simd_avx2.cpp PROPERTIES COMPILE_FLAGS "/arch:AVX2")
+    endif()
+    
+    # Test AVX512 with MSVC
+    set(CMAKE_REQUIRED_FLAGS "/arch:AVX512")
+    check_cxx_source_compiles("
+        #include <immintrin.h>
+        int main() { 
+            __m512i a = _mm512_setzero_si512();
+            return 0;
+        }" HAS_AVX512)
+    unset(CMAKE_REQUIRED_FLAGS)
+    
+    if (HAS_AVX512)
+        message(STATUS "AVX512 support detected. Enabling AVX512 build.")
+        list(APPEND SIMD_SOURCES src/simd_avx512.cpp)
+        list(APPEND SIMD_COMPILE_DEFINITIONS USE_AVX512)
+        set_source_files_properties(src/simd_avx512.cpp PROPERTIES COMPILE_FLAGS "/arch:AVX512")
+    endif()
+
+else()
+    message(STATUS "Detected GCC/Clang compiler - using -m flags")
+    
+    # SSE2 for GCC/Clang
+    check_cxx_compiler_flag("-msse2" HAS_SSE2)
+    if (HAS_SSE2)
+        message(STATUS "SSE2 support detected. Enabling SSE2 build.")
+        list(APPEND SIMD_SOURCES src/simd_sse2.cpp)
+        list(APPEND SIMD_COMPILE_DEFINITIONS USE_SSE2)
+        set_source_files_properties(src/simd_sse2.cpp PROPERTIES COMPILE_FLAGS "-msse2")
+    endif()
+
+    # AVX2 for GCC/Clang
+    check_cxx_compiler_flag("-mavx2" HAS_AVX2)
+    if (HAS_AVX2)
+        message(STATUS "AVX2 support detected. Enabling AVX2 build.")
+        list(APPEND SIMD_SOURCES src/simd_avx2.cpp)
+        list(APPEND SIMD_COMPILE_DEFINITIONS USE_AVX2)
+        set_source_files_properties(src/simd_avx2.cpp PROPERTIES COMPILE_FLAGS "-mavx2")
+    endif()
+
+    # AVX512 for GCC/Clang
+    check_cxx_compiler_flag("-mavx512f" HAS_AVX512F)
+    check_cxx_compiler_flag("-mavx512dq" HAS_AVX512DQ)
+    if (HAS_AVX512F AND HAS_AVX512DQ)
+        message(STATUS "AVX512 support detected. Enabling AVX512 build.")
+        list(APPEND SIMD_SOURCES src/simd_avx512.cpp)
+        list(APPEND SIMD_COMPILE_DEFINITIONS USE_AVX512)
+        set_source_files_properties(src/simd_avx512.cpp PROPERTIES COMPILE_FLAGS "-mavx512f -mavx512dq")
+    endif()
+endif()
+
+# Create STATIC library only (no DLL nonsense)
+add_library(universal_rng STATIC
+    ${SRC_FILES}
+    ${SIMD_SOURCES}
+)
+
+# Set include directories
+target_include_directories(universal_rng PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
+# Apply SIMD compile definitions to the entire target
+if (SIMD_COMPILE_DEFINITIONS)
+    target_compile_definitions(universal_rng PRIVATE ${SIMD_COMPILE_DEFINITIONS})
+    message(STATUS "Enabled SIMD features: ${SIMD_COMPILE_DEFINITIONS}")
+else()
+    message(WARNING "No SIMD features detected - falling back to scalar only")
+endif()
+
+# Compiler-specific optimizations
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(universal_rng PRIVATE 
+        -O3 
+        -march=native 
+        -mtune=native
+        -ffast-math
+    )
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(universal_rng PRIVATE 
+        /O2
+    )
+endif()
+
+# Selftest binary
+add_executable(rng_selftest
+    tests/test_rng.cpp
+)
+
+target_link_libraries(rng_selftest universal_rng)
+target_include_directories(rng_selftest PRIVATE ${CMAKE_SOURCE_DIR}/include)
+
+# Debug output
+message(STATUS "=== Build Configuration ===")
+message(STATUS "Compiler: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "Building: Static library (.lib)")
+message(STATUS "SSE2:   Enabled")
+message(STATUS "AVX2:   ${HAS_AVX2}")
+if(MSVC)
+    message(STATUS "AVX512: ${HAS_AVX512}")
+else()
+    message(STATUS "AVX512: ${HAS_AVX512F} AND ${HAS_AVX512DQ}")
+endif()
+message(STATUS "SIMD files:   ${SIMD_SOURCES}")
+message(STATUS "============================")

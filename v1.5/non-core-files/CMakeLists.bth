@@ -1,0 +1,199 @@
+cmake_minimum_required(VERSION 3.14)
+project(universal_rng LANGUAGES CXX)
+
+include(CheckCXXCompilerFlag)
+include(CheckCXXSourceCompiles)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Option for shared library
+option(RNG_BUILD_SHARED "Build shared library (.dll)" OFF)
+
+# Base source files
+set(SRC_FILES
+    src/universal_rng.cpp
+    src/universal_rng_api.cpp
+    src/universal_rng_bitwidth.cpp
+    src/universal_rng_scalar.cpp
+    src/runtime_detect.cpp
+    src/cpu_detect.cpp
+)
+
+# SIMD detection and compilation setup
+set(SIMD_SOURCES)
+set(SIMD_COMPILE_DEFINITIONS)
+
+# Enhanced MSVC vs GCC/Clang detection
+if(MSVC)
+    message(STATUS "Detected MSVC compiler ${CMAKE_CXX_COMPILER_VERSION}")
+    
+    # SSE2 is always available on x64 with MSVC
+    message(STATUS "SSE2: Enabled (default on x64)")
+    list(APPEND SIMD_SOURCES src/simd_sse2.cpp)
+    list(APPEND SIMD_COMPILE_DEFINITIONS USE_SSE2)
+    
+    # Debug: Test basic intrinsics compilation
+    message(STATUS "Testing basic intrinsics compilation...")
+    
+    # Test AVX2 with detailed diagnostics
+    message(STATUS "Testing AVX2 compilation...")
+    set(CMAKE_REQUIRED_FLAGS "/arch:AVX2")
+    check_cxx_source_compiles("
+        #include <immintrin.h>
+        int main() { 
+            __m256i a = _mm256_setzero_si256();
+            __m256i b = _mm256_add_epi64(a, a);
+            return _mm256_extract_epi64(b, 0);
+        }" HAS_AVX2_DETAILED)
+    unset(CMAKE_REQUIRED_FLAGS)
+    
+    # Also try without /arch flag (sometimes MSVC is weird)
+    message(STATUS "Testing AVX2 without explicit arch flag...")
+    check_cxx_source_compiles("
+        #if defined(_M_X64) && !defined(_M_ARM64)
+        #include <immintrin.h>
+        int main() { 
+            __m256i a = _mm256_setzero_si256();
+            return 0;
+        }
+        #else
+        #error \"Not x64 or intrinsics not available\"
+        #endif
+        " HAS_AVX2_NO_FLAG)
+    
+    if (HAS_AVX2_DETAILED)
+        message(STATUS "AVX2 support detected with /arch:AVX2")
+        list(APPEND SIMD_SOURCES src/simd_avx2.cpp)
+        list(APPEND SIMD_COMPILE_DEFINITIONS USE_AVX2)
+        set_source_files_properties(src/simd_avx2.cpp PROPERTIES COMPILE_FLAGS "/arch:AVX2")
+    elseif (HAS_AVX2_NO_FLAG)
+        message(STATUS "AVX2 support detected without explicit arch flag")
+        list(APPEND SIMD_SOURCES src/simd_avx2.cpp)
+        list(APPEND SIMD_COMPILE_DEFINITIONS USE_AVX2)
+    else()
+        message(WARNING "AVX2 support not detected - this is unusual for modern CPUs")
+    endif()
+    
+    # Test AVX512 with detailed diagnostics  
+    message(STATUS "Testing AVX512 compilation...")
+    set(CMAKE_REQUIRED_FLAGS "/arch:AVX512")
+    check_cxx_source_compiles("
+        #include <immintrin.h>
+        int main() { 
+            __m512i a = _mm512_setzero_si512();
+            __m512i b = _mm512_add_epi64(a, a);
+            return _mm512_extract_epi64(b, 0);
+        }" HAS_AVX512_DETAILED)
+    unset(CMAKE_REQUIRED_FLAGS)
+    
+    if (HAS_AVX512_DETAILED)
+        message(STATUS "AVX512 support detected. Enabling AVX512 build.")
+        list(APPEND SIMD_SOURCES src/simd_avx512.cpp)
+        list(APPEND SIMD_COMPILE_DEFINITIONS USE_AVX512)
+        set_source_files_properties(src/simd_avx512.cpp PROPERTIES COMPILE_FLAGS "/arch:AVX512")
+    endif()
+
+else()
+    message(STATUS "Detected GCC/Clang compiler - using -m flags")
+    
+    # SSE2 for GCC/Clang
+    check_cxx_compiler_flag("-msse2" HAS_SSE2)
+    if (HAS_SSE2)
+        message(STATUS "SSE2 support detected. Enabling SSE2 build.")
+        list(APPEND SIMD_SOURCES src/simd_sse2.cpp)
+        list(APPEND SIMD_COMPILE_DEFINITIONS USE_SSE2)
+        set_source_files_properties(src/simd_sse2.cpp PROPERTIES COMPILE_FLAGS "-msse2")
+    endif()
+
+    # AVX2 for GCC/Clang
+    check_cxx_compiler_flag("-mavx2" HAS_AVX2)
+    if (HAS_AVX2)
+        message(STATUS "AVX2 support detected. Enabling AVX2 build.")
+        list(APPEND SIMD_SOURCES src/simd_avx2.cpp)
+        list(APPEND SIMD_COMPILE_DEFINITIONS USE_AVX2)
+        set_source_files_properties(src/simd_avx2.cpp PROPERTIES COMPILE_FLAGS "-mavx2")
+    endif()
+
+    # AVX512 for GCC/Clang
+    check_cxx_compiler_flag("-mavx512f" HAS_AVX512F)
+    check_cxx_compiler_flag("-mavx512dq" HAS_AVX512DQ)
+    if (HAS_AVX512F AND HAS_AVX512DQ)
+        message(STATUS "AVX512 support detected. Enabling AVX512 build.")
+        list(APPEND SIMD_SOURCES src/simd_avx512.cpp)
+        list(APPEND SIMD_COMPILE_DEFINITIONS USE_AVX512)
+        set_source_files_properties(src/simd_avx512.cpp PROPERTIES COMPILE_FLAGS "-mavx512f -mavx512dq")
+    endif()
+endif()
+
+# Create library (shared or static based on option)
+if(RNG_BUILD_SHARED)
+    add_library(universal_rng SHARED
+        ${SRC_FILES}
+        ${SIMD_SOURCES}
+    )
+    # Export symbols for DLL
+    target_compile_definitions(universal_rng PRIVATE BUILDING_UNIVERSAL_RNG_DLL)
+    target_compile_definitions(universal_rng INTERFACE USING_UNIVERSAL_RNG_DLL)
+    message(STATUS "Building shared library (.dll)")
+else()
+    add_library(universal_rng STATIC
+        ${SRC_FILES}
+        ${SIMD_SOURCES}
+    )
+    message(STATUS "Building static library (.lib)")
+endif()
+
+if(RNG_BUILD_SHARED)
+    add_library(universal_rng SHARED
+        ${SRC_FILES}
+        ${SIMD_SOURCES}
+    )
+    # Use .def file for explicit exports on Windows
+    if(WIN32)
+        set_target_properties(universal_rng PROPERTIES 
+            LINK_FLAGS "/DEF:${CMAKE_SOURCE_DIR}/universal_rng.def")
+    endif()
+
+# Set include directories
+target_include_directories(universal_rng PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
+# Apply SIMD compile definitions to the entire target
+if (SIMD_COMPILE_DEFINITIONS)
+    target_compile_definitions(universal_rng PRIVATE ${SIMD_COMPILE_DEFINITIONS})
+    message(STATUS "Enabled SIMD features: ${SIMD_COMPILE_DEFINITIONS}")
+else()
+    message(WARNING "No SIMD features detected - falling back to scalar only")
+endif()
+
+# Compiler-specific optimizations
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(universal_rng PRIVATE 
+        -O3 
+        -march=native 
+        -mtune=native
+        -ffast-math
+    )
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(universal_rng PRIVATE 
+        /O2
+    )
+    # Note: /arch: flags are set per-file above
+endif()
+
+# Selftest binary
+add_executable(rng_selftest
+    tests/test_rng.cpp
+)
+
+target_link_libraries(rng_selftest universal_rng)
+target_include_directories(rng_selftest PRIVATE ${CMAKE_SOURCE_DIR}/include)
+
+# CPU Detection at configure time (for curiosity)
+message(STATUS "=== System Information ===")
+message(STATUS "CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
+message(STATUS "CMAKE_HOST_SYSTEM_PROCESSOR: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+if(WIN32)
+    message(STATUS "Target: Windows")
+endif()
+message(STATUS "==========================")

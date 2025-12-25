@@ -1,0 +1,78 @@
+Enhanced Bit Width Benchmark
+==========================
+
+Select bit width to benchmark:
+1. 16-bit
+2. 32-bit
+3. 64-bit
+4. 128-bit
+5. 256-bit
+6. 512-bit
+7. 1024-bit
+Enter choice (1-7): Enter number of iterations (default: 10000000): 
+Running benchmarks with 100000000 iterations for 256-bit numbers...
+
+Creating RNG...
+CPU feature detection:
+  SSE2: Yes
+  AVX2: Yes
+  AVX512: No
+AVX512 not compiled in, skipping
+Trying AVX2 implementation...
+Using AVX2 implementation
+RNG created successfully
+Benchmarking AVX2 Xoroshiro128++ (Single Mode)
+Benchmarking AVX2 Xoroshiro128++ (Batch Mode)
+Creating RNG...
+CPU feature detection:
+  SSE2: Yes
+  AVX2: Yes
+  AVX512: No
+AVX512 not compiled in, skipping
+Trying AVX2 implementation...
+Using AVX2 implementation
+RNG created successfully
+Benchmarking AVX2 WyRand (Single Mode)
+Benchmarking AVX2 WyRand (Batch Mode)
+Benchmarking std::mt19937_64 (Single Mode)
+Benchmarking std::mt19937_64 (Batch Mode)
+Benchmarking Xoroshiro128+ (Single Mode)
+Benchmarking Xoroshiro128+ (Batch Mode)
+
+Benchmark Results for 256-bit
+================================
+Implementation           Mode      Time (sec)     Speed (M/s)    
+-----------------------------------------------------------------
+AVX2 Xoroshiro128++      Single    1.2992         76.97          
+AVX2 Xoroshiro128++      Batch     0.3179         314.52         
+AVX2 WyRand              Single    1.2864         77.73          
+AVX2 WyRand              Batch     0.2500         400.08         
+std::mt19937_64          Single    0.4787         208.88         
+std::mt19937_64          Batch     0.9503         105.23         
+Xoroshiro128+            Single    0.4179         239.31         
+Xoroshiro128+            Batch     0.5117         195.44         
+
+Fastest implementation: AVX2 WyRand (Batch Mode) at 400.08 M/s
+
+Batch vs Single Mode Speedup:
+============================
+AVX2 Xoroshiro128++: 4.09x faster in batch mode
+AVX2 WyRand: 5.15x faster in batch mode
+std::mt19937_64: 0.50x faster in batch mode
+Xoroshiro128+: 0.82x faster in batch mode
+
+Single Mode Comparative Analysis:
+================================
+Compared to std::mt19937_64:
+  AVX2 Xoroshiro128++: 0.37x faster
+  AVX2 WyRand: 0.37x faster
+  Xoroshiro128+: 1.15x faster
+
+Batch Mode Comparative Analysis:
+================================
+Compared to std::mt19937_64:
+  AVX2 Xoroshiro128++: 2.99x faster
+  AVX2 WyRand: 3.80x faster
+  Xoroshiro128+: 1.86x faster
+
+Benchmark completed successfully!

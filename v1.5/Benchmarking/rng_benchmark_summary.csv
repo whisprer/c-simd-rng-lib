@@ -1,0 +1,169 @@
+Bit Width,Implementation,Mode,Mean Speed (M/s),Std Dev,Min Speed,Max Speed,Sample Count
+16,"    Xoroshiro128+
+Name: 4, dtype: object","    Batch
+Name: 4, dtype: object",903.96,51.26,783.46,947.78,11
+16,"    AVX2 Xoroshiro128++
+Name: 3, dtype: object","    Batch
+Name: 3, dtype: object",901.14,131.02,605.05,983.95,11
+16,"    AVX2 WyRand
+Name: 1, dtype: object","    Batch
+Name: 1, dtype: object",878.93,91.05,676.64,992.73,11
+16,"    Xoroshiro128+
+Name: 5, dtype: object","    Single
+Name: 5, dtype: object",874.1,45.17,820.93,949.71,11
+16,"    std::mt19937_64
+Name: 6, dtype: object","    Batch
+Name: 6, dtype: object",467.5,15.36,427.46,480.88,11
+16,"    std::mt19937_64
+Name: 7, dtype: object","    Single
+Name: 7, dtype: object",397.36,32.58,315.21,439.03,11
+16,"    ----------------------------------------------...
+Name: 0, dtype: object","    Single
+Name: 0, dtype: object",264.34,21.04,206.79,281.7,11
+16,"    AVX2 WyRand
+Name: 2, dtype: object","    Single
+Name: 2, dtype: object",264.09,21.82,217.05,286.69,11
+32,"    AVX2 Xoroshiro128++
+Name: 11, dtype: object","    Batch
+Name: 11, dtype: object",972.9,76.58,751.89,1024.53,11
+32,"    Xoroshiro128+
+Name: 12, dtype: object","    Batch
+Name: 12, dtype: object",914.13,11.66,891.76,937.91,11
+32,"    Xoroshiro128+
+Name: 13, dtype: object","    Single
+Name: 13, dtype: object",905.71,61.46,822.58,969.95,11
+32,"    AVX2 WyRand
+Name: 9, dtype: object","    Batch
+Name: 9, dtype: object",899.02,94.11,703.11,1002.99,11
+32,"    std::mt19937_64
+Name: 14, dtype: object","    Batch
+Name: 14, dtype: object",441.85,31.55,361.23,473.79,11
+32,"    std::mt19937_64
+Name: 15, dtype: object","    Single
+Name: 15, dtype: object",338.74,37.4,254.62,407.91,11
+32,"    AVX2 WyRand
+Name: 10, dtype: object","    Single
+Name: 10, dtype: object",269.19,5.41,254.86,273.49,11
+32,"    ----------------------------------------------...
+Name: 8, dtype: object","    Single
+Name: 8, dtype: object",243.61,22.43,194.24,266.02,11
+64,"    AVX2 Xoroshiro128++
+Name: 19, dtype: object","    Batch
+Name: 19, dtype: object",1355.19,372.39,572.57,1592.08,12
+64,"    AVX2 WyRand
+Name: 17, dtype: object","    Batch
+Name: 17, dtype: object",1344.93,365.79,448.07,1587.01,12
+64,"    Xoroshiro128+
+Name: 21, dtype: object","    Single
+Name: 21, dtype: object",919.53,76.54,721.52,980.6,12
+64,"    Xoroshiro128+
+Name: 20, dtype: object","    Batch
+Name: 20, dtype: object",828.79,48.53,746.41,880.15,12
+64,"    std::mt19937_64
+Name: 23, dtype: object","    Single
+Name: 23, dtype: object",450.27,66.73,273.62,490.93,12
+64,"    AVX2 WyRand
+Name: 18, dtype: object","    Single
+Name: 18, dtype: object",388.13,62.02,228.14,438.84,12
+64,"    ----------------------------------------------...
+Name: 16, dtype: object","    Single
+Name: 16, dtype: object",347.58,63.6,253.64,421.29,12
+64,"    std::mt19937_64
+Name: 22, dtype: object","    Batch
+Name: 22, dtype: object",330.92,24.95,270.42,354.61,12
+128,"    AVX2 WyRand
+Name: 25, dtype: object","    Batch
+Name: 25, dtype: object",779.02,103.11,561.26,848.17,10
+128,"    AVX2 Xoroshiro128++
+Name: 27, dtype: object","    Batch
+Name: 27, dtype: object",764.31,57.57,703.67,844.01,10
+128,"    Xoroshiro128+
+Name: 29, dtype: object","    Single
+Name: 29, dtype: object",433.62,4.35,424.63,438.21,10
+128,"    Xoroshiro128+
+Name: 28, dtype: object","    Batch
+Name: 28, dtype: object",364.68,8.84,355.45,377.96,10
+128,"    std::mt19937_64
+Name: 31, dtype: object","    Single
+Name: 31, dtype: object",330.56,37.38,237.58,370.28,10
+128,"    std::mt19937_64
+Name: 30, dtype: object","    Batch
+Name: 30, dtype: object",204.28,18.89,151.47,213.9,10
+128,"    AVX2 WyRand
+Name: 26, dtype: object","    Single
+Name: 26, dtype: object",172.19,6.28,160.02,179.87,10
+128,"    ----------------------------------------------...
+Name: 24, dtype: object","    Single
+Name: 24, dtype: object",162.83,6.23,152.22,168.7,10
+256,"    AVX2 Xoroshiro128++
+Name: 35, dtype: object","    Batch
+Name: 35, dtype: object",359.94,59.0,207.59,419.38,11
+256,"    AVX2 WyRand
+Name: 33, dtype: object","    Batch
+Name: 33, dtype: object",354.75,76.97,216.97,412.89,11
+256,"    Xoroshiro128+
+Name: 37, dtype: object","    Single
+Name: 37, dtype: object",243.13,5.65,230.47,248.41,11
+256,"    std::mt19937_64
+Name: 39, dtype: object","    Single
+Name: 39, dtype: object",217.21,23.52,155.09,238.69,11
+256,"    Xoroshiro128+
+Name: 36, dtype: object","    Batch
+Name: 36, dtype: object",192.01,21.5,129.3,204.23,11
+256,"    std::mt19937_64
+Name: 38, dtype: object","    Batch
+Name: 38, dtype: object",105.89,7.69,92.09,114.54,11
+256,"    AVX2 WyRand
+Name: 34, dtype: object","    Single
+Name: 34, dtype: object",79.13,6.11,62.53,86.01,11
+256,"    ----------------------------------------------...
+Name: 32, dtype: object","    Single
+Name: 32, dtype: object",75.72,4.18,68.48,80.29,11
+512,"    AVX2 Xoroshiro128++
+Name: 43, dtype: object","    Batch
+Name: 43, dtype: object",179.49,27.89,103.96,203.15,11
+512,"    AVX2 WyRand
+Name: 41, dtype: object","    Batch
+Name: 41, dtype: object",170.43,28.85,101.72,203.92,11
+512,"    std::mt19937_64
+Name: 47, dtype: object","    Single
+Name: 47, dtype: object",124.56,10.33,101.25,139.24,11
+512,"    Xoroshiro128+
+Name: 45, dtype: object","    Single
+Name: 45, dtype: object",123.24,1.87,120.75,125.95,11
+512,"    Xoroshiro128+
+Name: 44, dtype: object","    Batch
+Name: 44, dtype: object",100.9,9.8,80.27,111.36,11
+512,"    std::mt19937_64
+Name: 46, dtype: object","    Batch
+Name: 46, dtype: object",51.99,3.39,46.89,57.42,11
+512,"    AVX2 WyRand
+Name: 42, dtype: object","    Single
+Name: 42, dtype: object",42.76,4.62,32.3,48.07,11
+512,"    ----------------------------------------------...
+Name: 40, dtype: object","    Single
+Name: 40, dtype: object",41.72,4.32,30.27,46.63,11
+1024,"    AVX2 Xoroshiro128++
+Name: 51, dtype: object","    Batch
+Name: 51, dtype: object",95.92,20.33,34.76,105.38,11
+1024,"    AVX2 WyRand
+Name: 49, dtype: object","    Batch
+Name: 49, dtype: object",90.97,19.61,37.18,102.66,11
+1024,"    Xoroshiro128+
+Name: 53, dtype: object","    Single
+Name: 53, dtype: object",61.05,3.54,54.11,63.78,11
+1024,"    Xoroshiro128+
+Name: 52, dtype: object","    Batch
+Name: 52, dtype: object",50.75,2.65,45.54,52.97,11
+1024,"    std::mt19937_64
+Name: 54, dtype: object","    Batch
+Name: 54, dtype: object",25.02,2.43,19.85,28.19,11
+1024,"    AVX2 WyRand
+Name: 50, dtype: object","    Single
+Name: 50, dtype: object",24.27,2.52,16.89,25.65,11
+1024,"    ----------------------------------------------...
+Name: 48, dtype: object","    Single
+Name: 48, dtype: object",24.05,1.93,18.59,25.47,11
+1024,"    std::mt19937_64
+Name: 55, dtype: object","    Single
+Name: 55, dtype: object",20.68,1.96,15.6,22.16,11

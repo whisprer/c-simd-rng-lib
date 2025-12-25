@@ -1,0 +1,14 @@
+
+Benchmark Results for 16-bit
+================================
+Implementation           Mode      Time (sec)     Speed (M/s)
+-----------------------------------------------------------------
+AVX2 Xoroshiro128++      Single    0.4496         222.43
+AVX2 Xoroshiro128++      Batch     0.1389         720.17
+AVX2 WyRand              Single    0.4247         235.45
+AVX2 WyRand              Batch     0.1785         560.13
+std::mt19937_64          Single    0.5109         195.74
+std::mt19937_64          Batch     0.2290         436.61
+Xoroshiro128+            Single    0.1150         869.47
+Xoroshiro128+            Batch     0.1133         882.35
+            
